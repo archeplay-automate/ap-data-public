@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "ARCHEPLAY PRE-REQUISITES INSTALLATION BEGIN"
 cd /
 git clone https://github.com/archeplay-automate/archeplay.git
 cd /archeplay
@@ -28,3 +29,4 @@ sudo adduser --system --ingroup app --uid 150 app
 sudo usermod -a -G sudo app
 sudo usermod -a -G admin app
 sudo chown -R  app:app /archeplay/
+echo "ARCHEPLAY PRE-REQUISITES INSTALLED"
