@@ -1,19 +1,20 @@
 #!/bin/bash
 cd /
 git clone https://github.com/archeplay-automate/archeplay.git
+cd /archeplay
 snap download microk8s --channel=1.20/stable
 snap download core
 mkdir /archeplay/mountcp
-sudo mount -t squashfs -o rw /archeplay/microk8s_2074.snap /archeplay/mountcp
+sudo mount -t squashfs -o rw /archeplay/microk8s_*.snap /archeplay/mountcp
 cp -R /archeplay/mountcp/. /archeplay/package/microk8s
-snap ack /archeplay/core_10908.assert
-snap install /archeplay/core_10908.snap
+snap ack /archeplay/core_*.assert
+snap install /archeplay/core_*.snap
 umount /archeplay/mountcp/
 rm -rf /archeplay/mountcp
-rm /archeplay/core_10908.assert
-rm /archeplay/core_10908.snap
-mv /archeplay/microk8s_2074.snap /archeplay/package
-mv /archeplay/microk8s_2074.assert /archeplay/package
+rm /archeplay/core_*.assert
+rm /archeplay/core_*.snap
+mv /archeplay/microk8s_*.snap /archeplay/package
+mv /archeplay/microk8s_*.assert /archeplay/package
 apt-get update
 apt install awscli -y
 curl -fsSL https://get.docker.com -o /archeplay/package/get-docker.sh
