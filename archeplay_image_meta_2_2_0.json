@@ -1,0 +1,29 @@
+{
+    "registryurl": "public.ecr.aws/archeplay-dev",
+    "images": {
+        "aws-docker-eks-kubernetes": {
+            "imagename": "aws-docker-eks-kubernetes",
+            "tag": "2.2.0"
+        },
+        "docker-flask-gunicorn": {
+            "imagename": "docker-flask-gunicorn",
+            "tag": "2.2.0"
+        },
+        "dynamodb-database-deploy": {
+            "imagename": "dynamodb-database-deploy",
+            "tag": "2.2.0"
+        },
+        "dynamodbmockdeploy": {
+            "imagename": "dynamodbmockdeploy",
+            "tag": "2.2.0"
+        },
+        "apigw": {
+            "imagename": "apigw",
+            "tag": "2.2.0"
+        },
+        "mockapideploy": {
+            "imagename": "mockapideploy",
+            "tag": "2.2.0"
+        }
+    }
+}
