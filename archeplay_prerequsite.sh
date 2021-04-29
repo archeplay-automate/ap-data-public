@@ -10,6 +10,10 @@ adduser --system --ingroup app --uid 150 app
 usermod -a -G app
 usermod -a -G admin app
 
+snap download microk8s --channel=1.20/stable --target-directory=/archeplay
+sudo snap ack microk8s_*.assert
+sudo snap install microk8s_*.snap
+
 mkdir /home/ubuntu/.kube
 touch /home/ubuntu/.kube/config
 
