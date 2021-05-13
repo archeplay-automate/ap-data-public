@@ -7,7 +7,6 @@ git clone https://github.com/archeplay-automate/archeplay.git /archeplay
 
 addgroup --system --gid 150 app
 adduser --system --ingroup app --uid 150 app
-usermod -a -G app
 usermod -a -G admin app
 
 snap download microk8s --channel=1.20/stable --target-directory=/archeplay
