@@ -2,47 +2,95 @@
 echo "ARCHEPLAY PRE-REQUISITES INSTALLATION BEGIN"
 apt-get update
 apt install awscli -y
+if $? == 0
+then
+    echo "AWSCLI installed successfully"
+else
+    echo "AWSCLI installation failed"
+fi
 
 git clone https://github.com/archeplay-automate/archeplay.git /archeplay
-
+if $? == 0
+then
+    echo "cloned archeplay successfully"
+else
+    echo "Archeplay directory failed to download"
+fi
 addgroup --system --gid 150 app
 adduser --system --ingroup app --uid 150 app
 usermod -a -G app
 usermod -a -G admin app
 
+echo "microk8s start"
 snap download microk8s --channel=1.20/stable --target-directory=/archeplay
-sudo snap ack microk8s_*.assert
-sudo snap install microk8s_*.snap
-
-mkdir /home/ubuntu/.kube
-touch /home/ubuntu/.kube/config
+snap ack /archeplay/microk8s_*.assert
+snap install /archeplay/microk8s_*.snap --classic
+if $? == 0
+then
+    echo "microk8s installed successfully"
+else
+    echo "microk8s installation failed"
+fi
+snap alias microk8s.kubectl kubectl
+if [[ -d /home/ubuntu/.kube ]]
+then
+    echo "/home/ubuntu/.kube exists on your filesystem."
+    if [[ -f "/home/ubuntu/.kube/config" ]]
+    then
+        echo "This file exists on your filesystem."
+    else
+        touch /home/ubuntu/.kube/config
+        echo "kubeconfig created"
+    fi
+else
+    mkdir /home/ubuntu/.kube
+    if [[ -f "/home/ubuntu/.kube/config" ]]
+    then
+        echo "This file exists on your filesystem."
+    else
+        touch /home/ubuntu/.kube/config
+        echo "kubeconfig created"
+    fi
+fi
 
 chown -R  app:app /archeplay/
 
-sed -i 's/first-found/interface=ens*/g' /archeplay/package/microk8s/upgrade-scripts/000-switch-to-calico/resources/calico.yaml
+sed -i 's/first-found/interface=ens*/g' /var/snap/microk8s/current/args/cni-network/cni.yaml
 echo "changed calico"
-sed -i 's/hostPort: 443/hostPort: 9443/g' /archeplay/package/microk8s/actions/ingress.yaml
+cp /snap/microk8s/current/actions/ingress.yaml /archeplay/package/
+sed -i 's/hostPort: 443/hostPort: 9443/g' /archeplay/package/ingress.yaml
 echo "chaged ingress host port 443"
-sed -i 's/hostPort: 80/hostPort: 9000/g' /archeplay/package/microk8s/actions/ingress.yaml
+sed -i 's/hostPort: 80/hostPort: 9000/g' /archeplay/package/ingress.yaml
 echo "chaged ingress host port 80"
 machineip=`curl -s ifconfig.me`
 echo $machineip
-grep -v 'advertise-address' /archeplay/package/microk8s/default-args/kube-apiserver >  /archeplay/package/microk8s/default-args/kube-apiserver.new
-mv  /archeplay/package/microk8s/default-args/kube-apiserver.new /archeplay/package/microk8s/default-args/kube-apiserver
-echo "--advertise-address=$machineip" >> /archeplay/package/microk8s/default-args/kube-apiserver
+grep -v 'advertise-address' /var/snap/microk8s/current/args/kube-apiserver >  /var/snap/microk8s/current/args/kube-apiserver.new
+mv  /var/snap/microk8s/current/args/kube-apiserver.new /var/snap/microk8s/current/args/kube-apiserver
+echo "--advertise-address=$machineip" >> /var/snap/microk8s/current/args/kube-apiserver
 echo "updated kube-apiserver "
-echo "microk8s start"
-snap try /archeplay/package/microk8s --classic
-echo "microk8s installation complete"
+
 usermod -a -G microk8s ubuntu
-echo "enabling microk8s"
-snap start --enable microk8s
-echo "microk8s enable complete"
 microk8s status --wait-ready
 sleep 5
+echo "resetting microk8s"
+microk8s reset
+if $? == 0
+then
+    echo "microk8s reset successful"
+else
+    echo "microk8s reset failed"
+fi
 echo " enable addons "
-microk8s enable dns storage registry ingress
-echo "microk8s enabling"
+microk8s enable dns storage registry
+
+echo "enabling ingress"
+kubectl apply -f /archeplay/package/ingress.yaml
+if $? == 0
+then
+    echo "ingress enable successful"
+else
+    echo "ingress enable failed"
+fi
 microk8s status --wait-ready
 snap alias microk8s.kubectl kubectl
 echo "updating kubeconfig"
