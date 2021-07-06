@@ -18,7 +18,6 @@ else
 fi
 addgroup --system --gid 150 app
 adduser --system --ingroup app --uid 150 app
-usermod -a -G app
 usermod -a -G admin app
 
 echo "microk8s start"
